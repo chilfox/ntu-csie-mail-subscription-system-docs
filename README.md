@@ -15,12 +15,24 @@
 ```text
 .
 ├── apps/                     # Django applications
-├── core/                     # Django 設定與根 URL
+│   ├── accounts/             # LDAP 登入與權限
+│   └── subscriptions/        # 訂閱與 alias 管理
+├── core/                     # Django 專案設定
+│   ├── settings.py           # 應用程式與環境設定
+│   └── urls.py               # 根 URL 路由
 ├── frontend/                 # React + Vite 前端
+│   └── src/                  # 前端原始碼
 ├── scripts/                  # 維運與同步 scripts
-│   └── monitor/              # HA monitor、service 與測試
-├── docs/                     # source-code 詳細技術文件
-└── load-tests/               # 負載測試資料
+│   ├── monitor/              # HA monitor、service 與測試
+│   └── db_sync.sh            # DB sync 執行入口
+├── load-tests/               # 負載測試資料與腳本
+├── docs/                     # 詳細技術文件
+├── manage.py                 # Django 管理入口
+├── Dockerfile                # 應用程式容器映像
+├── docker-compose.yml        # 本機服務編排
+├── pyproject.toml            # Python 專案與工具設定
+├── .env.example              # 環境變數範例
+└── .env.role.example         # 角色環境變數範例
 ```
 
 ## Files on Host Machine (Not in Repository)
