@@ -14,16 +14,13 @@
 
 ```text
 .
-├── docs/                         # 系統文件
-├── docs-template/                # 文件範本
-└── source-code/                  # 應用程式與部署檔
-    ├── apps/                     # Django applications
-    ├── core/                     # Django 設定與根 URL
-    ├── frontend/                 # React + Vite 前端
-    ├── scripts/                  # 維運與同步 scripts
-    │   └── monitor/              # HA monitor、service 與測試
-    ├── docs/                     # source-code 詳細技術文件
-    └── load-tests/               # 負載測試資料
+├── apps/                     # Django applications
+├── core/                     # Django 設定與根 URL
+├── frontend/                 # React + Vite 前端
+├── scripts/                  # 維運與同步 scripts
+│   └── monitor/              # HA monitor、service 與測試
+├── docs/                     # source-code 詳細技術文件
+└── load-tests/               # 負載測試資料
 ```
 
 ## Files on Host Machine (Not in Repository)
