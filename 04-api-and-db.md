@@ -1,6 +1,6 @@
 # API 與資料庫參考
 
-本頁是目前實作的 exhaustive reference；以 `source-code/core`、`source-code/apps` 與 `source-code/frontend` 為準。API 不直接寫入 LDAP：本地資料庫與 task queue 先更新，worker 再同步 LDAP。
+本頁是目前實作的 exhaustive reference；以 `core`、`apps` 與 `frontend` 為準。API 不直接寫入 LDAP：本地資料庫與 task queue 先更新，worker 再同步 LDAP。
 
 ## Base path
 

@@ -2,7 +2,7 @@
 
 ## 準備部署環境
 
-在 `source-code/` 執行本頁指令。先準備 Docker Compose、Docker daemon、可連線的 LDAP（含 CA 憑證）、PostgreSQL/Redis 所需主機資源，以及不含秘密的部署紀錄。設定欄位詳見[設定說明](./03-setup.md)；LDAP 是唯一真相來源，PostgreSQL 只是快取與待處理佇列。
+在 project root directory 執行本頁指令。先準備 Docker Compose、Docker daemon、可連線的 LDAP（含 CA 憑證）、PostgreSQL/Redis 所需主機資源，以及不含秘密的部署紀錄。設定欄位詳見[設定說明](./03-setup.md)；LDAP 是唯一真相來源，PostgreSQL 只是快取與待處理佇列。
 
 | 項目 | 部署前必須確認 |
 |---|---|
@@ -21,7 +21,7 @@
 ## 啟動 Compose 服務並驗證
 
 ```bash
-cd /opt/mailsub/source-code
+cd /opt/mailsub
 export COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.yml}"
 docker compose -f "$COMPOSE_FILE" config >/tmp/mailsub-compose-config-$(date +%Y%m%d-%H%M%S).yml
 docker compose -f "$COMPOSE_FILE" build
@@ -67,10 +67,10 @@ docker compose -f "$COMPOSE_FILE" exec worker sh -lc 'printf "LAST_SYNC_FILE=%s\
 
 ## 安裝 HA monitor
 
-每台節點安裝 host-level monitor；先編輯 `/etc/mailsub/monitor.env` 的本機 IP、peer 與路徑。source-code 內的 unit 仍保留原樣；因 repository 位於 `/opt/mailsub/source-code`，以下先產生修正後的 unit，再安裝該份檔案：
+每台節點安裝 host-level monitor；先編輯 `/etc/mailsub/monitor.env` 的本機 IP、peer 與路徑。project root directory 內的 unit 仍保留原樣；因 repository 位於 `/opt/mailsub`，以下先產生修正後的 unit，再安裝該份檔案：
 
 ```bash
-cd /opt/mailsub/source-code
+cd /opt/mailsub
 sudo install -d -m 0750 /etc/mailsub
 sudo install -m 0640 scripts/monitor/monitor.env.example /etc/mailsub/monitor.env
 sudo tee /tmp/mailsub-monitor.service >/dev/null <<'UNIT'
@@ -81,8 +81,8 @@ Wants=docker.service
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/mailsub/source-code
-ExecStart=/usr/bin/python3 /opt/mailsub/source-code/scripts/monitor/monitor.py
+WorkingDirectory=/opt/mailsub
+ExecStart=/usr/bin/python3 /opt/mailsub/scripts/monitor/monitor.py
 EnvironmentFile=/etc/mailsub/monitor.env
 Restart=always
 RestartSec=5
@@ -100,7 +100,7 @@ curl -fsS http://127.0.0.1:9123/health
 sudo systemctl status --no-pager mailsub-monitor
 ```
 
-預期 health 回傳 JSON；`systemctl status` 顯示 `Active: active (running)`，並顯示 `/usr/bin/python3` 執行 `/opt/mailsub/source-code/scripts/monitor/monitor.py`。預設每 15 秒檢查，失效 3 次切換、恢復 2 次 failback、無 peer 8 次進入 degraded mode；ACTIVE 才設定 `FLUSH_ENABLED=1`。以 `journalctl -u mailsub-monitor` 驗證 `active_transition`、`db_sync_failed` 與 `failback_blocked_stale_sync`。
+預期 health 回傳 JSON；`systemctl status` 顯示 `Active: active (running)`，並顯示 `/usr/bin/python3` 執行 `/opt/mailsub/scripts/monitor/monitor.py`。預設每 15 秒檢查，失效 3 次切換、恢復 2 次 failback、無 peer 8 次進入 degraded mode；ACTIVE 才設定 `FLUSH_ENABLED=1`。以 `journalctl -u mailsub-monitor` 驗證 `active_transition`、`db_sync_failed` 與 `failback_blocked_stale_sync`。
 
 ## 查看日誌與健康狀態
 

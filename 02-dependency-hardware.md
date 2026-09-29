@@ -1,6 +1,6 @@
 # 依賴與硬體
 
-本頁是可查閱的依賴 reference。版本、服務名稱、port、volume 與 mount 以 `source-code/docker-compose.yml`、`Dockerfile`、`pyproject.toml`、`requirements.txt` 和 `frontend/package.json` 為準；本頁不描述部署操作。啟動與驗證請見 [03 建置與啟動](./03-setup.md)，migration、同步、備份與 HA 維運請見 [05 部署、遷移與營運手冊](./05-migration.md)。
+本頁是可查閱的依賴 reference。版本、服務名稱、port、volume 與 mount 以 `docker-compose.yml`、`Dockerfile`、`pyproject.toml`、`requirements.txt` 和 `frontend/package.json` 為準；本頁不描述部署操作。啟動與驗證請見 [03 建置與啟動](./03-setup.md)，migration、同步、備份與 HA 維運請見 [05 部署、遷移與營運手冊](./05-migration.md)。
 
 系統責任邊界是：LDAP 是唯一真相來源；PostgreSQL 提供本地快取與工作佇列；LDAP 同步 worker 由 ACTIVE 節點執行 LDAP 寫入。
 
@@ -11,14 +11,14 @@
 | 類別 | 依賴 | Repository 可驗證的用途／限制 |
 |---|---|---|
 | Container runtime | Docker Engine、Docker Compose v2（`docker compose`） | 建立下列五個 Compose service 與 `mail_net` bridge network。 |
-| Backend image | Python 3.11 slim Bookworm、Django、Django REST Framework、Django-Q2 | `source-code/Dockerfile` 建置 backend；web 執行 Django `runserver`，LDAP 同步 worker 執行 `python manage.py qcluster`。 |
+| Backend image | Python 3.11 slim Bookworm、Django、Django REST Framework、Django-Q2 | `Dockerfile` 建置 backend；web 執行 Django `runserver`，LDAP 同步 worker 執行 `python manage.py qcluster`。 |
 | Frontend image | Node.js 20 Alpine、npm、React、Vite | `frontend` 執行 Vite development server；版本以 `frontend/package-lock.json` 為準。 |
 | Database | PostgreSQL 15 Alpine | Django schema、session、PostgreSQL 本地快取與工作佇列。LDAP 是唯一真相來源。 |
 | Queue／cache | Redis 7 Alpine | Redis DB 0 給 Django-Q queue，DB 1 給 rate-limit cache。 |
 | Identity service | 可達的 LDAP／LDAPS server、bind account、CA certificate | `ou=people` 用於登入，`ou=group` 用於 `mailAdmin` 權限查詢；TLS CA 驗證是必要條件。LDAP 不由 Compose 建立。 |
 | Package registry | npm registry（`frontend/.npmrc` 指定的 registry） | frontend 依賴安裝需要 registry 可達；registry 的可用性不是 repository 可驗證的本機服務。 |
 
-Python 直接依賴包括 `django`、`django-auth-ldap`、`django-cors-headers`、`django-q2`、`djangorestframework`、`ldap3`、`psycopg2-binary`、`python-dotenv` 與 `redis`。Dockerfile 另安裝 LDAP／PostgreSQL 編譯工具與 PostgreSQL 15 client。Frontend 直接依賴與版本詳見 `source-code/frontend/package.json` 及 lockfile。
+Python 直接依賴包括 `django`、`django-auth-ldap`、`django-cors-headers`、`django-q2`、`djangorestframework`、`ldap3`、`psycopg2-binary`、`python-dotenv` 與 `redis`。Dockerfile 另安裝 LDAP／PostgreSQL 編譯工具與 PostgreSQL 15 client。Frontend 直接依賴與版本詳見 `frontend/package.json` 及 lockfile。
 
 ### Ports
 
@@ -39,8 +39,8 @@ Compose 使用固定的 `mail_net` bridge subnet `10.5.0.0/16`、gateway `10.5.0
 |---|---|---|
 | `postgres` | named volume `postgres_data:/var/lib/postgresql/data` | PostgreSQL 資料。 |
 | `redis` | named volume `redis_data:/data` | Redis queue／cache 資料。 |
-| `web`、`worker` | `source-code/.:/app` | 開發時以 repository working tree 覆蓋 image 內程式。 |
-| `frontend` | `source-code/frontend:/app`、anonymous `/app/node_modules` | 開發時掛載 frontend source，保留 container dependencies。 |
+| `web`、`worker` | `.:/app` | 開發時以 repository working tree 覆蓋 image 內程式。 |
+| `frontend` | `frontend:/app`、anonymous `/app/node_modules` | 開發時掛載 frontend source，保留 container dependencies。 |
 | `worker` | `${LAST_SYNC_DIR}:${LAST_SYNC_DIR}` | 同步時間戳目錄；實際 host 路徑由設定決定。 |
 
 刪除 `postgres_data` 或 `redis_data` 會刪除本機狀態；這是資料破壞操作，執行前必須確認備份與目標 volume。Compose 對 service 設定 `restart: always`，並嘗試將 log 寫入 host `/dev/log`；host 是否有可用的 syslog socket 不由 repository 保證。

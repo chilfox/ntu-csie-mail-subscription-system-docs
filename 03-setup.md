@@ -1,13 +1,13 @@
 # 建置與啟動
 
-本頁是從 repository 完成本機開發環境的 how-to。所有命令從 `source-code/` 執行。此流程需要一個由 identity service 提供、可連線的 LDAP／LDAPS；repository 沒有 local LDAP fixture，也不會替你建立 LDAP server 或測試資料。LDAP 是唯一真相來源；PostgreSQL 提供本地快取與工作佇列，`ou=Aliases` 的寫入由 LDAP 同步 worker 非同步處理。正式 HA 環境僅由 ACTIVE 節點執行 LDAP 寫入。
+本頁是從 repository 完成本機開發環境的 how-to。所有命令從 project root directory 執行。此流程需要一個由 identity service 提供、可連線的 LDAP／LDAPS；repository 沒有 local LDAP fixture，也不會替你建立 LDAP server 或測試資料。LDAP 是唯一真相來源；PostgreSQL 提供本地快取與工作佇列，`ou=Aliases` 的寫入由 LDAP 同步 worker 非同步處理。正式 HA 環境僅由 ACTIVE 節點執行 LDAP 寫入。
 
 ## Prerequisites
 
 頁首檢查清單：
 
 - 工具：Docker Engine、Docker Compose v2（`docker compose`）；產生 secret 需 Python 3 或 OpenSSL。
-- Repository 檔案：`source-code/.env.example`、`source-code/.env.role.example`、`source-code/docker-compose.yml`、`source-code/Dockerfile`。
+- Repository 檔案：`.env.example`、`.env.role.example`、`docker-compose.yml`、`Dockerfile`。
 - 外部檔案：identity service 提供的 LDAP CA certificate；container 內必須可讀。
 - 外部服務：可達的 LDAPS endpoint、可查詢 `ou=people`／`ou=group` 的 bind account，以及對應密碼。不要假設 `localhost:389` 是 LDAP。
 - Host ports：`5432`（PostgreSQL）、`6379`（Redis）、`8000`（Django web）、`55111`（Vite frontend）。這四個 port 必須可用。
@@ -37,7 +37,6 @@ done
 以下命令可直接複製：
 
 ```bash
-cd source-code
 cp .env.example .env
 cp .env.role.example .env.role
 chmod 600 .env .env.role
@@ -57,7 +56,7 @@ chmod 600 .env .env.role
 | `LDAP_URI` | 例如 `ldaps://ldap.example.edu:636` | 必須是實際可達的 LDAPS URI；不可使用 `ldap://localhost:389` fallback。 |
 | `LDAP_BIND_DN` | 例如 `uid=mailtest,ou=people,dc=csie,dc=ntu,dc=edu,dc=tw` | 由 identity service 提供。 |
 | `LDAP_BIND_PASSWORD` | bind account 密碼 | 不可提交或貼入文件。 |
-| `LDAP_CA_CERT_FILE` | 例如 `/app/ldap-ca.crt` | **container 內**的絕對路徑；host 檔案要放在 `source-code/ldap-ca.crt`。 |
+| `LDAP_CA_CERT_FILE` | 例如 `/app/ldap-ca.crt` | **container 內**的絕對路徑；host 檔案要放在 `ldap-ca.crt`。 |
 | `REDIS_QUEUE_URL` | `redis://redis:6379/0` | 單機 queue。 |
 | `REDIS_CACHE_URL` | `redis://redis:6379/1` | 單機 cache。 |
 | `VITE_API_TARGET` | `http://web:8000` | frontend container 到 web 的 proxy target。 |
@@ -102,7 +101,7 @@ python3 -c 'import secrets; print(secrets.token_urlsafe(48))'
 
 ### 啟動前 validation gate
 
-在 `source-code/` 執行以下可複製檢查。它只讀取 `.env` 與 CA 檔案，不會連線 LDAP，也不會寫入 LDAP tree：
+在 project root directory 執行以下可複製檢查。它只讀取 `.env` 與 CA 檔案，不會連線 LDAP，也不會寫入 LDAP tree：
 
 ```bash
 python3 - <<'PY'

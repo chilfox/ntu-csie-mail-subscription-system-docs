@@ -41,9 +41,9 @@
 
 | 路徑 | 用途 | 是否含敏感資料／權限注意 |
 |---|---|---|
-| `/opt/mailsub/source-code/.env` | 靜態 Compose 與 LDAP、資料庫設定 | 是；限部署帳號讀寫，勿提交 Git |
-| `/opt/mailsub/source-code/.env.role` | monitor 產生的 ACTIVE／STANDBY 覆寫設定 | 是；monitor 與容器需可讀寫，勿提交 Git |
-| `/opt/mailsub/source-code/ldap-ca.crt` | LDAP TLS CA 憑證，對應 container 內的 `LDAP_CA_CERT_FILE` | 通常否；限 web／worker 可讀 |
+| `/opt/mailsub/.env` | 靜態 Compose 與 LDAP、資料庫設定 | 是；限部署帳號讀寫，勿提交 Git |
+| `/opt/mailsub/.env.role` | monitor 產生的 ACTIVE／STANDBY 覆寫設定 | 是；monitor 與容器需可讀寫，勿提交 Git |
+| `/opt/mailsub/ldap-ca.crt` | LDAP TLS CA 憑證，對應 container 內的 `LDAP_CA_CERT_FILE` | 通常否；限 web／worker 可讀 |
 | `/etc/mailsub/monitor.env` | host-level monitor 設定與部署路徑 | 可能是；限 monitor 服務讀取，建議 `0640` |
 | `/var/lib/mailsub/` | `LAST_SYNC_FILE` 的 host 目錄，bind-mount 給 worker | 否；需允許 worker UID/GID `10001` 寫入 |
 | `/var/lib/mailsub/last_sync` | DB sync 成功時間戳（`LAST_SYNC_FILE`） | 否；需由 worker 寫入、由 monitor 讀取 |
