@@ -8,7 +8,9 @@
 
 | 成員 | 負責範圍 |
 |---|---|
-| 待團隊補充 | 待團隊補充 |
+| Qwertypig | Basic Structure and Utilities |
+| chilfox | Synchronization |
+| bbwinner (wen) | Database and API |
 
 ## Repository Layout
 
